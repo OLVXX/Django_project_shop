@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>Shopping Cart</h1>
+            <div class="nav-links">
+                <a href="{% url 'main_site' %}">Back to Shop</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="cart-container">
+        {% if cart_items %}
+            {% for item in cart_items %}
+            <div class="cart-item">
+                <img src="{{ item.article.image.url }}" alt="{{ item.article.name }}">
+                <div class="item-details">
+                    <h3>{{ item.article.name }}</h3>
+                    <p>Quantity: {{ item.quantity }}</p>
+                    <p>Price: ${{ item.article.price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="cart-total">
+                <h2>Total: ${{ total }}</h2>
+                <button class="checkout-btn">Proceed to Checkout</button>
+            </div>
+        {% else %}
+            <p>Your cart is empty</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shop</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>Welcome to our Shop</h1>
+            <div class="nav-links">
+                <a href="{% url 'view_cart' %}">Cart ({{ cart_items }})</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="categories">
+        {% for category in categories %}
+        <button class="category-btn">{{ category.name }}</button>
+        {% endfor %}
+    </div>
+    
+    <div class="articles-grid">
+        {% for article in articles %}
+        <div class="article-card">
+            {% if article.image %}
+            <img src="{{ article.image.url }}" alt="{{ article.name }}">
+            {% endif %}
+            <h3>{{ article.name }}</h3>
+            <p>{{ article.description }}</p>
+            <p class="price">${{ article.price }}</p>
+            <p class="stock">Stock: {{ article.stock }}</p>
+            <button class="buy-btn" onclick="addToCart({{ article.id }})">Add to Cart</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+    function addToCart(articleId) {
+        fetch(`/add-to-cart/${articleId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('a[href="/cart/"]').textContent = `Cart (${data.cart_count})`;
+            });
+    }
+    </script>
+</body>
+</html>
