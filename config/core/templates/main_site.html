@@ -16,22 +16,25 @@
     </nav>
 
     <div class="categories">
+        <button class="category-btn active" data-category="all">All</button>
         {% for category in categories %}
-        <button class="category-btn">{{ category.name }}</button>
+        <button class="category-btn" data-category="{{ category.name }}">{{ category.name }}</button>
         {% endfor %}
     </div>
     
     <div class="articles-grid">
         {% for article in articles %}
-        <div class="article-card">
+        <div class="article-card" data-category="{{ article.category.name }}">
             {% if article.image %}
             <img src="{{ article.image.url }}" alt="{{ article.name }}">
             {% endif %}
             <h3>{{ article.name }}</h3>
             <p>{{ article.description }}</p>
             <p class="price">${{ article.price }}</p>
-            <p class="stock">Stock: {{ article.stock }}</p>
-            <button class="buy-btn" onclick="addToCart({{ article.id }})">Add to Cart</button>
+            <p class="stock" data-article-id="{{ article.id }}">Stock: {{ article.stock }}</p>
+            <button class="buy-btn" onclick="addToCart({{ article.id }})" {% if article.stock == 0 %}disabled{% endif %}>
+                {% if article.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+            </button>
         </div>
         {% endfor %}
     </div>
@@ -41,9 +44,44 @@
         fetch(`/add-to-cart/${articleId}/`)
             .then(response => response.json())
             .then(data => {
-                document.querySelector('a[href="/cart/"]').textContent = `Cart (${data.cart_count})`;
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.querySelector('a[href="/cart/"]').textContent = `Cart (${data.cart_count})`;
+                    const stockElement = document.querySelector(`[data-article-id="${articleId}"]`);
+                    stockElement.textContent = `Stock: ${data.stock}`;
+                    if (data.stock === 0) {
+                        const button = stockElement.nextElementSibling;
+                        button.disabled = true;
+                        button.textContent = 'Out of Stock';
+                    }
+                }
             });
     }
+
+    // Add category filtering
+    document.querySelectorAll('.category-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            const selectedCategory = button.dataset.category;
+            
+            // Show/hide articles based on category
+            document.querySelectorAll('.article-card').forEach(article => {
+                if (selectedCategory === 'all' || article.dataset.category === selectedCategory) {
+                    article.style.display = 'block';
+                } else {
+                    article.style.display = 'none';
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>

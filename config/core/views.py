@@ -1,19 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
+from django.db import IntegrityError
+from django.contrib import messages
 from .models import Article, Cart, Category
+from django.db.models import F
+from decimal import Decimal
 
-# Create your views here.
 
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('main_site')
+        try:
+            if form.is_valid():
+                user = form.save()
+                login(request, user)
+                return redirect('main_site')
+        except IntegrityError:
+            messages.error(request, 'Username already exists. Please choose a different username.')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -32,20 +38,47 @@ def main_site(request):
 @login_required
 def add_to_cart(request, article_id):
     article = get_object_or_404(Article, id=article_id)
-    cart_item, created = Cart.objects.get_or_create(
-        user=request.user,
-        article=article
-    )
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-    return JsonResponse({'cart_count': Cart.objects.filter(user=request.user).count()})
+    if article.stock > 0:
+        cart_item, created = Cart.objects.get_or_create(
+            user=request.user,
+            article=article
+        )
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+        article.stock -= 1
+        article.save()
+        return JsonResponse({
+            'cart_count': Cart.objects.filter(user=request.user).count(),
+            'stock': article.stock
+        })
+    return JsonResponse({'error': 'Out of stock'}, status=400)
 
 @login_required
 def view_cart(request):
     cart_items = Cart.objects.filter(user=request.user)
     total = sum(item.article.price * item.quantity for item in cart_items)
-    return render(request, 'cart.html', {'cart_items': cart_items, 'total': total})
+    return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'total': total
+    })
+
+@login_required
+def remove_from_cart(request, item_id):
+    if request.method == 'POST':
+        cart_item = get_object_or_404(Cart, id=item_id, user=request.user)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+        
+        # Return stock to article
+        article = cart_item.article
+        article.stock += 1
+        article.save()
+        
+        return JsonResponse({'status': 'success'})
 
 def user_login(request):
     if request.method == 'POST':
@@ -58,3 +91,7 @@ def user_login(request):
         else:
             return render(request, 'registration/login.html', {'error': 'Invalid login details'})
     return render(request, 'registration/login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

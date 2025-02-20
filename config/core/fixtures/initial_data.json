@@ -1,0 +1,95 @@
+[
+    {
+        "model": "core.category",
+        "pk": 1,
+        "fields": {
+            "name": "Laptops"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 2,
+        "fields": {
+            "name": "Smartphones"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 3,
+        "fields": {
+            "name": "Gaming"
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 1,
+        "fields": {
+            "name": "MacBook Pro",
+            "description": "Powerful laptop with M2 chip",
+            "price": "1299.99",
+            "category": 1,
+            "stock": 10,
+            "image": null
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 2,
+        "fields": {
+            "name": "Dell XPS 13",
+            "description": "Ultra-thin Windows laptop",
+            "price": "999.99",
+            "category": 1,
+            "stock": 15,
+            "image": null
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 3,
+        "fields": {
+            "name": "iPhone 15",
+            "description": "Latest Apple smartphone",
+            "price": "999.99",
+            "category": 2,
+            "stock": 20,
+            "image": null
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 4,
+        "fields": {
+            "name": "Samsung S24",
+            "description": "Premium Android smartphone",
+            "price": "899.99",
+            "category": 2,
+            "stock": 25,
+            "image": null
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 5,
+        "fields": {
+            "name": "PlayStation 5",
+            "description": "Next-gen gaming console",
+            "price": "499.99",
+            "category": 3,
+            "stock": 8,
+            "image": null
+        }
+    },
+    {
+        "model": "core.article",
+        "pk": 6,
+        "fields": {
+            "name": "Xbox Series X",
+            "description": "Microsoft's powerful gaming console",
+            "price": "499.99",
+            "category": 3,
+            "stock": 12,
+            "image": null
+        }
+    }
+]

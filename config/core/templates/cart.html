@@ -1,7 +1,8 @@
+{% load cart_tags %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Shopping Cart</title>
+    <title>Your Cart</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -19,11 +20,18 @@
         {% if cart_items %}
             {% for item in cart_items %}
             <div class="cart-item">
+                {% if item.article.image %}
                 <img src="{{ item.article.image.url }}" alt="{{ item.article.name }}">
+                {% endif %}
                 <div class="item-details">
                     <h3>{{ item.article.name }}</h3>
-                    <p>Quantity: {{ item.quantity }}</p>
                     <p>Price: ${{ item.article.price }}</p>
+                    <div class="quantity-controls">
+                        <p>Quantity: {{ item.quantity }}</p>
+                        <button class="remove-one-btn" onclick="removeFromCart({{ item.id }})">-</button>
+                        <button class="remove-all-btn" onclick="removeAllFromCart({{ item.id }})">Remove All</button>
+                    </div>
+                    <p>Subtotal: ${{ item.article.price|multiply:item.quantity }}</p>
                 </div>
             </div>
             {% endfor %}
@@ -32,8 +40,37 @@
                 <button class="checkout-btn">Proceed to Checkout</button>
             </div>
         {% else %}
-            <p>Your cart is empty</p>
+            <div class="empty-cart">
+                <p>Your cart is empty</p>
+                <a href="{% url 'main_site' %}" class="continue-shopping">Continue Shopping</a>
+            </div>
         {% endif %}
     </div>
+
+    <script>
+    function removeFromCart(itemId) {
+        fetch(`/remove-from-cart/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        }).then(() => window.location.reload());
+    }
+
+    function removeAllFromCart(itemId) {
+        // Call remove multiple times based on quantity
+        const promises = [];
+        const quantity = parseInt(document.querySelector(`[data-item-id="${itemId}"] .quantity`).textContent);
+        for(let i = 0; i < quantity; i++) {
+            promises.push(fetch(`/remove-from-cart/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }));
+        }
+        Promise.all(promises).then(() => window.location.reload());
+    }
+    </script>
 </body>
 </html>
