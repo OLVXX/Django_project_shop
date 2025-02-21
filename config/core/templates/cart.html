@@ -8,7 +8,9 @@
 <body>
     <nav>
         <div class="nav-container">
-            <h1>Shopping Cart</h1>
+            <div class="nav-left">
+                <h1>Welcome, {{ request.user.username }}!</h1>
+            </div>
             <div class="nav-links">
                 <a href="{% url 'main_site' %}">Back to Shop</a>
                 <a href="{% url 'logout' %}">Logout</a>
